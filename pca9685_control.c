@@ -17,7 +17,10 @@
 #define MODE2_FAST 0x0C
 #define MODE2_SAFE 0x04
 #define ALLCALLADR 0x70
-#define LED0_ON_L 0x06
+#define SERVO_1 0x06
+#define SERVO_2 0x0A
+#define SERVO_3 0x0E
+#define MOTOR 0x12
 
 //We take zero delay and thus the start time is always zero
 //Initialize empty 12-bit char arrays to store stop time of pulse. Define a structure to hold both values
@@ -30,7 +33,7 @@ typedef struct {
 DutyCycleValues duty_cycle(double duty_cycle) {
     DutyCycleValues values;
     // Compute the 12-bit value
-    int dec = (int)round(4095 * duty_cycle);
+    int dec = (int)round(4095 * duty_cycle/100);
     // Assign the lower and upper bits
     values.LED_OFF_L = dec & 0xFF;
     values.LED_OFF_H = (dec >> 8) & 0x0F;
@@ -110,14 +113,35 @@ int main(){
         printf("MODE2 mismatch: 0x%02X\n", val);
     }
 
-    //Turn the servo motor
-    DutyCycleValues low_time = duty_cycle(0.09);
+    //Range of servo motor is 180 degrees, from 1.6 to 15.5 duty cycle.
+    //The servo rotates continuously at duty cycle = 1.55 and 16
+    //Initialise all the servo motors at duty cycle = 8.5
+    DutyCycleValues low_time = duty_cycle(8.5);
     __uint8_t buf_1[5];
-    buf_1[0] = LED0_ON_L;
+    //SERVO1
+    buf_1[0] = SERVO_1;
     buf_1[1] = 0x00;   // ON_L
     buf_1[2] = 0x00;   // ON_H
     buf_1[3] = low_time.LED_OFF_L;   // OFF_L
     buf_1[4] = low_time.LED_OFF_H;   // OFF_H
+    write(file, buf_1, 5);
+    if (write(file, buf_1, 5) != 5) {
+        perror("Servo write failed");
+    }
+    else{
+        printf("PWM Write successful");
+    }
+    //SERVO2
+    buf_1[0] = SERVO_2;
+    write(file, buf_1, 5);
+    if (write(file, buf_1, 5) != 5) {
+        perror("Servo write failed");
+    }
+    else{
+        printf("PWM Write successful");
+    }
+    //SERVO3
+    buf_1[0] = SERVO_3;
     write(file, buf_1, 5);
     if (write(file, buf_1, 5) != 5) {
         perror("Servo write failed");
