@@ -116,7 +116,7 @@ int main(){
     //Range of servo motor is 180 degrees, from 1.6 to 15.5 duty cycle.
     //The servo rotates continuously at duty cycle = 1.55 and 16
     //Initialise all the servo motors at duty cycle = 8.5
-    DutyCycleValues low_time = duty_cycle(8.5);
+    DutyCycleValues low_time = duty_cycle(10.5);
     __uint8_t buf_1[5];
     //SERVO1
     buf_1[0] = SERVO_1;
@@ -124,7 +124,6 @@ int main(){
     buf_1[2] = 0x00;   // ON_H
     buf_1[3] = low_time.LED_OFF_L;   // OFF_L
     buf_1[4] = low_time.LED_OFF_H;   // OFF_H
-    write(file, buf_1, 5);
     if (write(file, buf_1, 5) != 5) {
         perror("Servo write failed");
     }
@@ -133,7 +132,6 @@ int main(){
     }
     //SERVO2
     buf_1[0] = SERVO_2;
-    write(file, buf_1, 5);
     if (write(file, buf_1, 5) != 5) {
         perror("Servo write failed");
     }
@@ -142,12 +140,57 @@ int main(){
     }
     //SERVO3
     buf_1[0] = SERVO_3;
-    write(file, buf_1, 5);
     if (write(file, buf_1, 5) != 5) {
         perror("Servo write failed");
     }
     else{
         printf("PWM Write successful");
     }
+    
+    //Arm the BLDC motor
+    DutyCycleValues low_time_motor = duty_cycle(10);
+    __uint8_t buf_2[5];
+    buf_2[0] = MOTOR;
+    buf_2[1] = 0x00;   // ON_L
+    buf_2[2] = 0x00;   // ON_H
+    buf_2[3] = low_time_motor.LED_OFF_L;   // OFF_L
+    buf_2[4] = low_time_motor.LED_OFF_H;   // OFF_H
+    if (write(file, buf_2, 5) != 5) {
+        perror("Servo write failed");
+    }
+    else{
+        printf("PWM Write successful");
+    }
+    usleep(1000000);
+    usleep(1000000);
+    if (write(file, buf_2, 5) != 5) {
+        perror("Servo write failed");
+    }
+    else{
+        printf("PWM Write successful");
+    }
+    usleep(1000000);
+    usleep(1000000);
+    low_time_motor = duty_cycle(7.5);
+    buf_2[3] = low_time_motor.LED_OFF_L;
+    buf_2[4] = low_time_motor.LED_OFF_H;
+    if (write(file, buf_2, 5) != 5) {
+        perror("Servo write failed");
+    }
+    else{
+        printf("PWM Write successful");
+    }
+    usleep(1000000);
+    usleep(1000000);
+    low_time_motor = duty_cycle(0);
+    buf_2[3] = low_time_motor.LED_OFF_L;
+    buf_2[4] = low_time_motor.LED_OFF_H;
+    if (write(file, buf_2, 5) != 5) {
+        perror("Servo write failed");
+    }
+    else{
+        printf("PWM Write successful");
+    }
+
     return 0;
 }
