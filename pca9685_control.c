@@ -116,7 +116,7 @@ int main(){
     //Range of servo motor is 180 degrees, from 1.6 to 15.5 duty cycle.
     //The servo rotates continuously at duty cycle = 1.55 and 16
     //Initialise all the servo motors at duty cycle = 8.5
-    DutyCycleValues low_time = duty_cycle(10.5);
+    DutyCycleValues low_time = duty_cycle(8.5);
     __uint8_t buf_1[5];
     //SERVO1
     buf_1[0] = SERVO_1;
