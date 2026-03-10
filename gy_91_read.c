@@ -139,12 +139,12 @@ int main(){
             exit(1);
         }
         // Do something with the data in mpu_data now
-        data[3] = (mpu_data[0] << 8) | mpu_data[1]; 
-        data[4] = (mpu_data[2] << 8) | mpu_data[3];
-        data[5] = (mpu_data[4] << 8) | mpu_data[5];
-        data[6] = ((mpu_data[8] << 8) | mpu_data[9])/131;
-        data[7] = ((mpu_data[10] << 8) | mpu_data[11])/131;
-        data[8] = ((mpu_data[12] << 8) | mpu_data[13])/131;
+        data[3] = (float)((__int16_t)((mpu_data[0] << 8) | mpu_data[1])); 
+        data[4] = (float)((__int16_t)((mpu_data[2] << 8) | mpu_data[3]));
+        data[5] = (float)((__int16_t)((mpu_data[4] << 8) | mpu_data[5]));
+        data[6] = (float)((__int16_t)((mpu_data[8] << 8) | mpu_data[9])/131);
+        data[7] = (float)((__int16_t)((mpu_data[10] << 8) | mpu_data[11])/131);
+        data[8] = (float)((__int16_t)((mpu_data[12] << 8) | mpu_data[13])/131);
         // Burst read bmp data
         if (ioctl(file, I2C_RDWR, &bmp_packets) < 0) {
             perror("Unable to send data");
@@ -191,7 +191,7 @@ int main(){
         var2 = p*p8/32768.0;
         p = p+(var1+var2+p7)/16.0;
         data[9] = 8434.42536*log(pow(101325/p, 0.0341/t));
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 10; i++) {
             printf("%f ", data[i]);
         }
         printf("\n");
