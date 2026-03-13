@@ -1,4 +1,5 @@
 #include <stdio.h> //Standard i/o functions library
+#include<stdlib.h> //For abs() function
 #include <lgpio.h> //GPIO library
 #include <unistd.h> // Required for usleep()
 #include <signal.h> // Required for catching Ctrl+C
@@ -6,7 +7,7 @@
 
 volatile int running = 1; // Global flag to control the main loop
 void handle_sigint(int sig) {running = 0;} // Signal handler to catch Ctrl+C and exit gracefully
-volatile uint64_t pulse_width = 0, rising_tick = 0; //global variable storing pulse_width and leading edge time
+volatile uint64_t pulse_width = 0, old_pulse_width=0, rising_tick = 0; //global variable storing pulse_width and leading edge time
 
 void alert_callback(int num_alerts, lgGpioAlert_p alerts, void *userdata){
     for (int i = 0; i < num_alerts; i++){
@@ -61,8 +62,9 @@ int main() {
     
     while(running){
         //Send pulse width to PCA9685 via I2C
-        if(pulse_width > 0){
+        if(pulse_width > 0 && abs(pulse_width-old_pulse_width)>7){
             printf("Pulse width : %lu\n", pulse_width);
+            old_pulse_width = pulse_width;
             pulse_width = 0;
         }
         usleep(1000);
