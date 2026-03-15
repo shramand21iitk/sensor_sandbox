@@ -62,8 +62,9 @@ int main() {
     
     while(running){
         //Send pulse width to PCA9685 via I2C
-        if(pulse_width > 0 && abs(pulse_width-old_pulse_width)>7){
-            printf("Pulse width : %lu\n", pulse_width);
+        if(pulse_width > 0 && abs((int64_t)pulse_width-(int64_t)old_pulse_width)>8){
+            double duty_cycle = (pulse_width / 200.0);
+            printf("Pulse: %lu us | Duty: %.2f%%\n", pulse_width, duty_cycle);
             old_pulse_width = pulse_width;
             pulse_width = 0;
         }
