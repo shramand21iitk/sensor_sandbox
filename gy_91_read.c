@@ -18,6 +18,14 @@
 #define WHO_AM_I 0x75
 #define dig_T1 0x88
 #define T_XLSB 0xFC
+#define PWR_MGMT_1 0x6B
+#define PWR_MGMT_2 0x6C
+#define CTRL_MEAS 0xF4
+#define CONFIG 0xF5
+#define SMPLRT_DIV 0x19
+#define CONFIG_MPU 0x1A
+#define GYRO_CONFIG 0x1B
+#define ACCEL_CONFIG 0x1C
 
 int main(){
 
@@ -31,30 +39,60 @@ int main(){
         exit(1);
     }
     unsigned char mpu_wai_reg = WHO_AM_I;
+    unsigned char wake_buf[2];
+    wake_buf[0] = PWR_MGMT_1;
+    wake_buf[1] = 0x00;
+    unsigned char smplrt[2];
+    smplrt[0] = SMPLRT_DIV;
+    smplrt[1] = 0x13;
+    unsigned char config_mpu[2];
+    config_mpu[0] = CONFIG_MPU;
+    config_mpu[1] = 0x04;
+    unsigned char start[2];
+    start[0] = PWR_MGMT_2;
+    start[1] = 0x00;
     unsigned char mpu_conf_buf[1];
     if (ioctl(file, I2C_SLAVE, mpuaddr) < 0) {
         perror("Failed to acquire bus access and/or talk to MPU9250");
         close(file);
         exit(1);
-    }else {
+    }
+    else {
         // Write register address we want to read
         if (write(file, &mpu_wai_reg, 1) != 1) {
             perror("Failed to write to the I2C bus (MPU9250)");
-        } else {
+        } 
+        else {
             // Read one byte from WHO_AM_I
             if (read(file, mpu_conf_buf, 1) != 1) {
                 perror("Failed to read from the I2C bus (MPU9250)");
-            } else {
+            } 
+            else {
                 printf("MPU9250 WHO_AM_I = 0x%02X\n", mpu_conf_buf[0]);
+                if (write(file, wake_buf, 2) != 2) {perror("Failed to write wake-up command to MPU9250");} 
+                else {
+                    printf("MPU9250 is awake and ready!\n");
+                    write(file, start, 2);
+                    write(file, smplrt, 2);
+                    write(file, config_mpu, 2);
+                }
             }
         }
     }
+    unsigned char ctrl[2], config[2];
+    ctrl[0] = CTRL_MEAS;
+    ctrl[1] = 0x57;
+    config[0] = CONFIG;
+    config[1] = 0x10;
     if (ioctl(file, I2C_SLAVE, bmpaddr) < 0) {
         perror("Failed to acquire bus access and/or talk to BMP280");
         close(file);
         exit(1);
-    }else {
+    }
+    else {
         printf("BMP280 communication setup OK\n");
+        write(file, ctrl, 2);
+        write(file, config, 2);
     }
 
     // Store magnetometer values
@@ -195,6 +233,7 @@ int main(){
             printf("%f ", data[i]);
         }
         printf("\n");
+        usleep(20000);
     }
     close(file);
 
